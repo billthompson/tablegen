@@ -44,4 +44,4 @@ Change column count and remove footer, change header cell value
     $('table').tablegen({size: {cols: 6}, header: {cellValue: "col"}, footer: {include: false}});
 
 
-Copyright 2012 Bill Thompson [billthompson.me](billthompson.me). Released under MIT License.
+Copyright 2012  [Bill Thompson](https://github.com/billthompson). Released under MIT License.
