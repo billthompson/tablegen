@@ -20,12 +20,14 @@ First, load [jQuery](http://jquery.com/) and the plugin:
     <script src="tablegen.jquery.js" type="text/javascript"></script>
 
 Make sure you have at least one HTML table defined
-    <table></table>
+    <code><table></table></code>
 
 Now, call tablegen (see the 'options' object for the default settings)
-    $(document).ready(function() {
-        $('table').tablegen();
-    });
+    <code>
+        $(document).ready(function() {
+            $('table').tablegen();
+        });
+    </code>
 
 Other examples:
 
