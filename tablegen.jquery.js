@@ -7,11 +7,13 @@
      * @description Allows easy creation of HTML tables for debug purposes. Need a 10 col x 100 row table?
      * Need a 50 col x 1 row table? tablegen will generate it in a flash so you can focus on the fun logic!
      *
+     * Note: 'self' always refers to the methods object (not 'this')!
+     *
      * Copyright Bill Thompson, 2012
      * This content is released under the MIT License http://www.opensource.org/licenses/mit-license.php.
      *
      * Basically, provided "as-is" and don't remove anything above this line and you'll be fine :)
-     
+     *
      * TODO: Refactor _generateHeader and _generateFooter.
      */
 
@@ -37,9 +39,7 @@
                     $(this).data('tablegen', methods.options);
                 }
 
-                //self._generate();
-                self._generate()
-
+                self._generate();
             });
         },
         _getOps : function(opt) {
@@ -76,7 +76,6 @@
 
             // What's a table without a body? Let's include it.
             self._generateBody();
-
         },
         _generateHeader: function() {
             var self = methods,
@@ -122,16 +121,15 @@
                 var $this = $(this),
                     data = $this.data('tablegen');
 
-                // Namespacing FTW
+                // Empty the table and remove it's data
                 $this.empty();
                 $this.removeData('tablegen');
             });
-
         }
     };
 
     $.fn.tablegen = function(method) {
-
+        // http://docs.jquery.com/Plugins/Authoring#Plugin_Methods
         if (methods[method]) {
             return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || ! method) {
