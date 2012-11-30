@@ -69,7 +69,7 @@
             $element[0].appendChild(fragment);
         },
         /**
-         * Create a table section ('thead', 'tfoot', 'tbody'). Responsibile 
+         * Create a table section ('thead', 'tfoot', 'tbody'). Responsible 
          * for getting its subsections as well.
          *
          * Takes a sectionOptions object to prevent costly data look ups 
