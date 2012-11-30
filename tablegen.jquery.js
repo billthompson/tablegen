@@ -1,28 +1,15 @@
 (function($) {
     /**
-     * tablegen.jquery.js
-     *
-     * @author Bill Thompson (@bthompson_)
-     * @website billthompson.me
-     * @description Allows easy creation of HTML tables for debug purposes. Need a 10 col x 100 row table?
-     * Need a 50 col x 1 row table? tablegen will generate it in a flash so you can focus on the fun logic!
-     *
-     * Note: 'self' always refers to the methods object (not 'this')!
-     *
-     * Copyright Bill Thompson, 2012
-     * This content is released under the MIT License http://www.opensource.org/licenses/mit-license.php.
-     *
-     * Basically, provided "as-is" and don't remove anything above this line and you'll be fine :)
-     *
-     * TODO: Refactor _generateHeader and _generateFooter.
+     * @name tablegen
+     * @author Bill Thompson
+     * @url https://github.com/billthompson/tablegen
+     * @description Quickly prototype tabular data of varying sizes.
+     * @license MIT
      */
 
     var methods = {
         options: {
-            size: {rows: 12, cols: 8},
-            header: {include: true, includeCellNum: true, cellValue: "hcol-"},
-            footer: {include: true, includeCellNum: true, cellValue: "fcol-"},
-            body: {includeCellNum: true, cellValue: "row-"}
+            size: {rows: 10, cols: 10}
         },
         init : function(userops) {
             var self = methods;
@@ -31,8 +18,8 @@
 
             return this.each(function() {
 
-                var $this = $(this),
-                    data = $this.data('tablegen');
+                var $this = $(this)
+                    , data = $this.data('tablegen');
 
                 // If the plugin hasn't been initialized yet
                 if (! data) {
@@ -44,10 +31,10 @@
         },
         _getOps : function(opt) {
             // Let's always get the options from the element data (not the options object)
-            var $this = $(methods.options.element),
-                data = $this.data('tablegen');
+            var $this = $(methods.options.element)
+                , data = $this.data('tablegen');
 
-            // If we are looking for a specific object, let's provide a shortcut
+            // If we are looking for a specific option, let's provide a shortcut
             if (opt != null) {
                 data = data[opt];
             }
@@ -55,71 +42,83 @@
             return data;
         },
         _generate: function() {
-            var self = methods,
-                element = self._getOps('element');
+            var $element = methods._getOps('element')
+                , rows = methods._getOps('size').rows
+                , columns = methods._getOps('size').cols
+                , fragment = document.createDocumentFragment().appendChild(document.createElement('table'));
 
-            // We don't want to assume previously valid syntax with correct
-            // column/row counts so let's start from scratch.
-            if($(element).children().length > 0) {
-                $(element).empty();
-            }
-
-            // If we should include the header, do so.
-            if (self._getOps('header').include) {
-                self._generateHeader();
-            }
-
-            // If we should include the footer, do so.
-            if (self._getOps('footer').include) {
-                self._generateFooter();
-            }
-
-            // What's a table without a body? Let's include it.
-            self._generateBody();
+            // Create the table header
+            fragment.appendChild(methods._generateTableSection({ type: 'thead'
+                                                                 , cellTag: 'th'
+                                                                 , rowStartIndex: 1
+                                                                 , rowsToGenerate: 1
+                                                                 , columns: columns }));
+            // Create the table footer
+            fragment.appendChild(methods._generateTableSection({ type: 'tfoot'
+                                                                 , cellTag: 'td'
+                                                                 , rowStartIndex: rows
+                                                                 , rowsToGenerate: 1
+                                                                 , columns: columns }));
+            // Create the table body
+            fragment.appendChild(methods._generateTableSection({ type: 'tbody'
+                                                                 , cellTag: 'td'
+                                                                 , rowStartIndex: 2
+                                                                 , rowsToGenerate: rows - 2
+                                                                 , columns: columns }));
+            // Append the table to the DOM
+            $element[0].appendChild(fragment);
         },
-        _generateHeader: function() {
-            var self = methods,
-                element = self._getOps('element'),
-                headRow = $(element).append('<thead/>').find('thead').append('<tr/>').find('tr').last();
+        /**
+         * Create a table section ('thead', 'tfoot', 'tbody'). Responsibile 
+         * for getting its subsections as well.
+         *
+         * Takes a sectionOptions object to prevent costly data look ups 
+         * for each row and column.
+         */
+        _generateTableSection: function(sectionOptions) {
+            var section = document.createElement(sectionOptions.type)
+                , fragment = document.createDocumentFragment()
+                , currentRowIndex = sectionOptions.rowStartIndex;
 
-            // Building a header with 1 row and N columns.
-            for (i = 0; i <= self._getOps('size').cols - 1; i++) {
-                // Determine if we should include the column number in the cell and render cell value
-                var cellValue = (self._getOps('header').includeCellNum) ? self._getOps('header').cellValue + i: self._getOps('header').cellValue;
-                $(headRow).append('<td/>').find('td').last().text(cellValue);
-            }
-        },
-        _generateFooter: function() {
-            var self = methods,
-                element = self._getOps('element'),
-                footRow = $(element).append('<tfoot/>').find('tfoot').append('<tr/>').find('tr').last();
+            // Generate n rows and append them to the section
+            for (var i = 0; i < sectionOptions.rowsToGenerate; i++) {
+                fragment.appendChild(methods._generateRow(sectionOptions, currentRowIndex));
 
-            // Building a footer with 1 row and N columns.
-            for (i = 0; i <= self._getOps('size').cols - 1; i++) {
-                // Determine if we should include the column number in the cell and render cell value
-                var cellValue = (self._getOps('footer').includeCellNum) ? self._getOps('footer').cellValue + i: self._getOps('footer').cellValue;
-                $(footRow).append('<td/>').find('td').last().text(cellValue);
+                currentRowIndex++;
             }
-        },
-        _generateBody: function() {
-            var self = methods,
-                element = self._getOps('element'),
-                tbody = $(element).append('<tbody/>');
 
-            // Building a body with N rows and K columns
-            for (i = 0; i <= self._getOps('size').rows - 1; i++) {
-                var row = $(tbody).append('<tr/>').find('tr').last();
-                for (j = 0; j <= self._getOps('size').cols - 1; j++) {
-                    // Determine if we should include the row number in the cell and render cell value
-                    var cellValue = (self._getOps('body').includeCellNum) ? self._getOps('body').cellValue + i: self._getOps('body').cellValue;
-                    $(row).append('<td/>').find('td').last().text(cellValue);
-                }
-            }
+            section.appendChild(fragment);
+
+            return section;
         },
+        /**
+         * Responsible for generating a table row of 'th' or  'td'
+         * children.
+         */
+        _generateRow: function(sectionOptions, rowIndex) {
+            var row = document.createElement('tr')
+                , fragment = document.createDocumentFragment();
+            
+            // Building a row with n columns. Using 1 based index for output.
+            for (var i = 1; i <= sectionOptions.columns; i++) {
+                var cellContainer = document.createElement(sectionOptions.cellTag)
+                    , cell = document.createTextNode(['R', rowIndex, '-C', i].join(''));
+
+                cellContainer.appendChild(cell);
+                fragment.appendChild(cellContainer);
+            }
+
+            row.appendChild(fragment);
+
+            return row;
+        },
+        /**
+         * Completely remove tablegen's existence.
+         */
         destroy : function() {
             return this.each(function() {
-                var $this = $(this),
-                    data = $this.data('tablegen');
+                var $this = $(this)
+                    , data = $this.data('tablegen');
 
                 // Empty the table and remove it's data
                 $this.empty();
@@ -137,7 +136,5 @@
         } else {
             $.error('Method ' + method + ' does not exist on jQuery.tablegen');
         }
-
     };
-
 })(jQuery);
